@@ -1,0 +1,49 @@
+services:
+
+  db:
+
+    image: postgres:17
+
+    container_name: academic_tasks_db
+
+    restart: always
+
+    environment:
+
+      POSTGRES_DB: academic_tasks_db
+
+      POSTGRES_USER: postgres
+
+      POSTGRES_PASSWORD: 1234
+
+    ports:
+
+      - "5432:5432"
+
+    volumes:
+
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+
+    build: ./backend
+
+    container_name: academic_tasks_api
+
+    restart: always
+
+    depends_on:
+
+      - db
+
+    ports:
+
+      - "8000:8000"
+
+    environment:
+
+      DATABASE_URL: postgresql://postgres:1234@db:5432/academic_tasks_db
+
+volumes:
+
+  postgres_data:
