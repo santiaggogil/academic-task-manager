@@ -6,6 +6,9 @@ from app.models.task_model import Task
 
 from app.models.task_status_model import TaskStatus
 from app.models.user_model import User
+from app.models.category_model import Category
+from app.models.priority_model import Priority
+from app.models.subject_model import Subject
 
 from app.schemas.task_schema import (
     TaskCreate,
@@ -13,11 +16,24 @@ from app.schemas.task_schema import (
 )
 
 
+
 def create_task_service(
     task: TaskCreate,
     db: Session,
     current_user: User
 ):
+    # Validate referenced ids exist to return clear 400 errors instead of 500
+    if task.subject_id is not None and not db.query(Subject).filter(Subject.id == task.subject_id).first():
+        raise HTTPException(status_code=400, detail=f"Subject with id {task.subject_id} does not exist")
+
+    if task.category_id is not None and not db.query(Category).filter(Category.id == task.category_id).first():
+        raise HTTPException(status_code=400, detail=f"Category with id {task.category_id} does not exist")
+
+    if task.priority_id is not None and not db.query(Priority).filter(Priority.id == task.priority_id).first():
+        raise HTTPException(status_code=400, detail=f"Priority with id {task.priority_id} does not exist")
+
+    if task.status_id is not None and not db.query(TaskStatus).filter(TaskStatus.id == task.status_id).first():
+        raise HTTPException(status_code=400, detail=f"Status with id {task.status_id} does not exist")
 
     new_task = Task(
         title=task.title,
